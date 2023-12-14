@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const EmergencyMedicalProfile = require('../models/EmergencyProfile');
 const User = require('../models/userModel');
 
+
 //@desc Get all emergies profiles
 //@route GET /api/healthRecords
 //@access Public
@@ -21,9 +22,8 @@ const getAllEmergencyProfiles = asyncHandler(
 //@desc Create a new emergency Profile
 //@route POST /api/healthRecords/profile
 //@access Public
-
 const createUserEmergencyProfile = asyncHandler(
-    async(req, res) => {
+    async (req, res) => {
         const {
             name,
             birthday,
@@ -43,9 +43,8 @@ const createUserEmergencyProfile = asyncHandler(
         const userID = req.user.id;
 
         try {
-
             // Check if the user already has an emergency profile
-            const existingEmergencyProfile = await EmergencyMedicalProfile.findOne({user: userID});
+            const existingEmergencyProfile = await EmergencyMedicalProfile.findOne({ user: userID });
 
             if (existingEmergencyProfile) {
                 console.log('Existing emergency profile found');
@@ -54,8 +53,9 @@ const createUserEmergencyProfile = asyncHandler(
                 });
             } else {
                 // No existing emergency profile found, create a new one
-                console.log('Creating a new emergency profile');
 
+                
+                // Create the emergency profile with the uploaded image
                 const newEmergencyProfile = await EmergencyMedicalProfile.create({
                     name,
                     birthday,
@@ -67,7 +67,7 @@ const createUserEmergencyProfile = asyncHandler(
                     emergencyContactName,
                     emergencyContactRelationship,
                     emergencyContactPhone,
-                    emergencyContactAddress,   
+                    emergencyContactAddress,
                     address,
                     notes,
                     user: userID,
@@ -78,11 +78,14 @@ const createUserEmergencyProfile = asyncHandler(
                 res.status(201).json(newEmergencyProfile);
             }
         } catch (err) {
+            console.error(err);
             res.status(500).json({
                 error: 'Internal server error',
             });
         }
-    });
+    }
+);
+
 
 
 

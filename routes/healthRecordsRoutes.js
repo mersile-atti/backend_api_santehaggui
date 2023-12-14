@@ -1,5 +1,7 @@
 const expres = require('express');
 const router = expres.Router();
+
+
 const { 
     getAllEmergencyProfiles,
     createUserEmergencyProfile,
