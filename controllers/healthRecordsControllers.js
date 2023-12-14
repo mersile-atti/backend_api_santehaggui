@@ -2,7 +2,6 @@ const asyncHandler = require('express-async-handler');
 const EmergencyMedicalProfile = require('../models/EmergencyProfile');
 const User = require('../models/userModel');
 
-
 //@desc Get all emergies profiles
 //@route GET /api/healthRecords
 //@access Public
@@ -26,7 +25,6 @@ const getAllEmergencyProfiles = asyncHandler(
 const createUserEmergencyProfile = asyncHandler(
     async(req, res) => {
         const {
-            profilePicture,
             name,
             birthday,
             gender,
@@ -35,13 +33,17 @@ const createUserEmergencyProfile = asyncHandler(
             medications,
             treatmentsAndProcedures,
             address,
-            emergencyContact,
-            notes
+            emergencyContactName,
+            emergencyContactRelationship,
+            emergencyContactPhone,
+            emergencyContactAddress,
+            notes,
         } = req.body;
 
         const userID = req.user.id;
 
         try {
+
             // Check if the user already has an emergency profile
             const existingEmergencyProfile = await EmergencyMedicalProfile.findOne({user: userID});
 
@@ -55,7 +57,6 @@ const createUserEmergencyProfile = asyncHandler(
                 console.log('Creating a new emergency profile');
 
                 const newEmergencyProfile = await EmergencyMedicalProfile.create({
-                    profilePicture,
                     name,
                     birthday,
                     gender,
@@ -63,8 +64,11 @@ const createUserEmergencyProfile = asyncHandler(
                     allergies,
                     medications,
                     treatmentsAndProcedures,
+                    emergencyContactName,
+                    emergencyContactRelationship,
+                    emergencyContactPhone,
+                    emergencyContactAddress,   
                     address,
-                    emergencyContact,
                     notes,
                     user: userID,
                 });
