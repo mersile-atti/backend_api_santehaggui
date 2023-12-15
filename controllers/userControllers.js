@@ -87,6 +87,7 @@ const currentUser = asyncHandler(
                 username: user.username,
                 email: user.email,
                 phone: user.phone,
+                umi: user.umi
             })
         
         }
