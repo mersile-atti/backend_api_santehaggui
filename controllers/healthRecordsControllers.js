@@ -108,37 +108,93 @@ const getUserEmergencyUniqueProfile = asyncHandler(
 //@route PUT /api/healthRecords/profile/
 const updateUserEmergencyProfile = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user.id);
-
+  
     if (user) {
-        try {
-            const emergencyProfileExists = await EmergencyMedicalProfile.exists({
-                user: req.user.id
-            });
-
-            if (!emergencyProfileExists) {
-                throw new Error('Emergency Profile does not exist for this user');
-            }
-
-            const updateData = req.body || {};
-
-            const updatedEmergencyProfile = await EmergencyMedicalProfile.findOneAndUpdate(
-                { user: req.user.id },
-                { $set: updateData },
-                { new: true }
-            );
-
-            res.status(200).json({
-                updatedEmergencyProfile,
-            });
-        } catch (err) {
-            res.status(400).json({
-                error: err.message
-            });
+      try {
+        const emergencyProfileExists = await EmergencyMedicalProfile.exists({
+          user: req.user.id
+        });
+  
+        if (!emergencyProfileExists) {
+          throw new Error('Emergency Profile does not exist for this user');
         }
+  
+        const { _id, name, birthday, gender, bloodType, allergies, medications, treatmentsAndProcedures, emergencyContactName, emergencyContactRelationship, emergencyContactPhone, emergencyContactAddress, address, notes } = req.body || {};
+        const emergencyProfile = await EmergencyMedicalProfile.findById(req.body._id);
+        const updatedEmergencyProfile = {};
+  
+        if (name) {
+          updatedEmergencyProfile.name = name;
+        }
+  
+        if (birthday) {
+          updatedEmergencyProfile.birthday = birthday;
+        }
+  
+        if (gender) {
+          updatedEmergencyProfile.gender = gender;
+        }
+  
+        if (bloodType) {
+          updatedEmergencyProfile.bloodType = bloodType;
+        }
+  
+        if (allergies) {
+          updatedEmergencyProfile.allergies = allergies;
+        }
+  
+        if (medications) {
+          updatedEmergencyProfile.medications = medications;
+        }
+  
+        if (treatmentsAndProcedures) {
+          updatedEmergencyProfile.treatmentsAndProcedures = treatmentsAndProcedures;
+        }
+  
+        if (emergencyContactName) {
+          updatedEmergencyProfile.emergencyContactName = emergencyContactName;
+        }
+  
+        if (emergencyContactRelationship) {
+          updatedEmergencyProfile.emergencyContactRelationship = emergencyContactRelationship;
+        }
+  
+        if (emergencyContactPhone) {
+          updatedEmergencyProfile.emergencyContactPhone = emergencyContactPhone;
+        }
+  
+        if (emergencyContactAddress) {
+          updatedEmergencyProfile.emergencyContactAddress = emergencyContactAddress;
+        }
+  
+        if (address) {
+          updatedEmergencyProfile.address = address;
+        }
+  
+        if (notes) {
+          updatedEmergencyProfile.notes = notes;
+        }
+
+        const result = await EmergencyMedicalProfile.findOneAndUpdate(
+            { user: req.user.id },
+            { $set: updatedEmergencyProfile },
+            { new: true }
+        );
+
+        res.status(200).json({
+          result,
+        });
+      } catch (err) {
+        res.status(400).json({
+          error: err.message
+        });
+      }
     } else {
-        res.status(404).json({ error: 'User not found' });
+      res.status(404).json({ error: 'User not found' });
     }
-});
+  });
+  
+  
 
   
 
