@@ -119,12 +119,14 @@ const updateUserEmergencyProfile = asyncHandler(async (req, res) => {
                 throw new Error('Emergency Profile does not exist for this user');
             }
 
-            const { _id, ...updateData } = req.body || {};
+            const updateData = req.body || {};
+
             const updatedEmergencyProfile = await EmergencyMedicalProfile.findOneAndUpdate(
                 { user: req.user.id },
                 { $set: updateData },
                 { new: true }
             );
+
             res.status(200).json({
                 updatedEmergencyProfile,
             });
@@ -137,6 +139,8 @@ const updateUserEmergencyProfile = asyncHandler(async (req, res) => {
         res.status(404).json({ error: 'User not found' });
     }
 });
+
+  
 
 
 //@desc Ddelete an emergency Profile
