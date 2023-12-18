@@ -32,7 +32,8 @@ const createBloodRequest = asyncHandler(
             console.log("New request created!");
             res.status(201).json(newRequest);
         } catch (error) {
-            res.status(400).json({
+            console.log('Failed to create', error)
+            res.status(500).json({
                 error: "Failed to create a new Request"
             })
         }});
