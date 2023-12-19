@@ -47,7 +47,9 @@ const getAllBloodRequests = asyncHandler(
             // Fetch all blood donation requests from the database
             const bloodRequests = await BloodDonationRequest.find();
 
-            res.status(200).json(bloodRequests);
+            res.status(200).json({
+                
+                "Blood Requests": bloodRequests});
         } catch (error) {
             res.status(500).json({ error: 'Internal Server Error' });
         }
