@@ -48,8 +48,8 @@ const getAllBloodRequests = asyncHandler(
             const bloodRequests = await BloodDonationRequest.find();
 
             res.status(200).json({
-                
-                "Blood Requests": bloodRequests});
+                bloodRequests
+            });
         } catch (error) {
             res.status(500).json({ error: 'Internal Server Error' });
         }
