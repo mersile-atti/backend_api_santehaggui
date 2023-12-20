@@ -13,7 +13,7 @@ const bloodDonationRequestSchema = new mongoose.Schema({
     responders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Reference to users responding to the request
     createdAt: String,
     urgency: { type: String, enum: ['Accident/Emergency', 'Chemotherapy', 'Maternity', 'Surgery'], required: [true, 'Urgency is required'],},
-    pintsNeeded: { type: Number, required: true },
+    pintsNeeded: { type: String, required: true },
     diagnosis: String,
     shortDescription: String,
 }, {timestamps: true}

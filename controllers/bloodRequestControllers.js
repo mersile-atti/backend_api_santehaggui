@@ -13,6 +13,7 @@ const createBloodRequest = asyncHandler(
         urgency,
         pintsNeeded,
         diagnosis,
+        createdAt,
         shortDescription,
         } = req.body;
 
@@ -27,6 +28,7 @@ const createBloodRequest = asyncHandler(
                 pintsNeeded,
                 diagnosis,
                 shortDescription,
+                createdAt,
                 user: userID
             });
             console.log("New request created!");
