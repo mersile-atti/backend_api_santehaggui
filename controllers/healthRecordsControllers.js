@@ -260,10 +260,10 @@ const setProfilePic = asyncHandler(async (req, res) => {
 
     const uploadSingle = upload("mysantehagguiproject-696700314561").single('images');
     uploadSingle(req, res, async(err) => {
+    
       if (err) 
         return res.status(400).json({ success: false, message: err.message });
         
-      
       await UserProfilePic.create({
         photUrl: req.file.location,
         user: userID
