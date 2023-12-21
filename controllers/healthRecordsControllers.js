@@ -1,7 +1,25 @@
 const asyncHandler = require('express-async-handler');
 const EmergencyMedicalProfile = require('../models/EmergencyProfile');
 const User = require('../models/userModel');
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+const UserProfilePic = require('../models/profilePicModel')
 
+
+// connect to aws s3
+
+const aws_access_key_id = process.env.AWS_ACCESS_KEY_ID;
+const aws_secret_access_key = process.env.AWS_SECRET_ACCESS_KEY;
+const s3_region = process.env.S3_REGION;
+
+const s3 = new S3Client({
+    credentials: {
+        accessKeyId: aws_access_key_id,
+        secretAccessKey: aws_secret_access_key
+    },
+    region: s3_region,
+})
 
 //@desc Get all emergies profiles
 //@route GET /api/healthRecords
@@ -221,13 +239,62 @@ const deleteUserEmergencyProfile = asyncHandler(
             message: `Successfully deleted Emergency Profile with ID ${emergencyProfileID}`
         })
     });
+    const upload = (bucketName) => {
+      return multer({
+     storage: multerS3({
+       s3,
+       bucket: bucketName,
+       metadata: function (req, file, cb) {
+         cb(null, { fieldName: file.fieldname });
+       },
+       key: function (req, file, cb) {
+         cb(null, `images-${Date.now()}.jpg`)
+       },
+     })
+   });
+ };
+
+const setProfilePic = asyncHandler(async (req, res) => {
+    const userID = req.user.id;
 
 
+    const uploadSingle = upload("mysantehagguiproject-696700314561").single('images');
+    uploadSingle(req, res, async(err) => {
+      if (err) 
+        return res.status(400).json({ success: false, message: err.message });
+        
+      
+      await UserProfilePic.create({
+        photUrl: req.file.location,
+        user: userID
+      })
+        
+      res.status(200).json({ data: req.file.location })
+      });
+
+});
+
+//@descr get userPic 
+//@route GET /api/healthRecords/profile/pic
+//@access Private
+
+const getUserPic = asyncHandler(async (req, res) => {
+    const userID = req.user.id;
+
+    const userPic = await UserProfilePic.findOne({ user: userID });
+    if (!userPic) {
+        throw new Error('User profile picture not found');
+    }
+
+    res.status(200).json({userPic});
+})
 
 module.exports=  {
     getAllEmergencyProfiles,
     createUserEmergencyProfile,
     updateUserEmergencyProfile,
     getUserEmergencyUniqueProfile,
-    deleteUserEmergencyProfile
+    deleteUserEmergencyProfile,
+    setProfilePic,
+    getUserPic
 }

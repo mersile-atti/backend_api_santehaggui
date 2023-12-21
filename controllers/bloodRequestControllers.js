@@ -93,7 +93,7 @@ const updateBloodRequest = asyncHandler(
                 console.log(error);
                 throw new Error(error); 
             }
-        } else {s
+        } else {
             res.status(401);
             throw new Error('User not found'); 
         }

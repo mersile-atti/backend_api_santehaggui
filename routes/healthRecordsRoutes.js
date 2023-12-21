@@ -7,14 +7,23 @@ const {
     createUserEmergencyProfile,
     updateUserEmergencyProfile,
     getUserEmergencyUniqueProfile,
-    deleteUserEmergencyProfile
+    deleteUserEmergencyProfile,
+    setProfilePic,
+    getUserPic
 } = require('../controllers/healthRecordsControllers');
+const {
+    getUserHealthMetrics,
+    createNewHealthMetrics,
+    updateHealthMetrics
+} = require('../controllers/heathMetricsControllers');
 const validateToken = require('../middleware/validateTokenHandler');
+
 
 
 router.use(validateToken);
 
 router.get('/', getAllEmergencyProfiles)
 router.route('/profile').get(getUserEmergencyUniqueProfile).post(createUserEmergencyProfile).put(updateUserEmergencyProfile).delete(deleteUserEmergencyProfile);
-
+router.route('/metrics').get(getUserHealthMetrics).post(createNewHealthMetrics).put(updateHealthMetrics);
+router.route('/profile/pic').get(getUserPic).post(setProfilePic);
 module.exports = router;
