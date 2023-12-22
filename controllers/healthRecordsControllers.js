@@ -269,7 +269,7 @@ const setProfilePic = asyncHandler(async (req, res) => {
         user: userID
       })
         
-      res.status(200).json({ data: req.file.location })
+      res.status(200).json({ data: req.file })
       });
 
 });
