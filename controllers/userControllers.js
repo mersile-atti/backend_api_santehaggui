@@ -2,6 +2,8 @@ const asyncHandler = require('express-async-handler');
 const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { getSecret } = require('../config/getSecret');
+
 
 //@desc Register a new user
 //@route POST /api/users
@@ -43,33 +45,44 @@ const registerUser = asyncHandler(
 //@route POST /api/users/auth
 //@access Public
 
-const authUser = asyncHandler(
-    async (req, res) => {
-    const { email, phone, password } = req.body;
-    const user = await User.findOne({ 
-        $or: [{ email }, { phone }]
-     });
+// authUser.js
 
-    if(!user) {
-        res.status(400)
-        throw new Error('User not found')
+
+const authUser = asyncHandler(async (req, res) => {
+    try {
+        const secretValue = await getSecret();
+        const { ACCESS_TOKEN_SECRET } = JSON.parse(secretValue);
+
+        const { email, phone, password } = req.body;
+        const user = await User.findOne({
+            $or: [{ email }, { phone }]
+        });
+
+        if (!user) {
+            res.status(400)
+            throw new Error('User not found');
+        }
+
+        if (user && await bcrypt.compare(password, user.password)) {
+            const accessToken = jwt.sign({
+                user: {
+                    username: user.username,
+                    email: user.email,
+                    phone: user.phone,
+                    id: user.id,
+                }
+            }, ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
+
+            res.status(200).json({ accessToken });
+        } else {
+            res.status(401);
+            throw new Error("Invalid credentials");
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
     }
+});
 
-    if(user && await bcrypt.compare(password, user.password)) {
-        const accessToken = jwt.sign({
-            user: {
-                username: user.username,
-                email: user.email,
-                phone: user.phone,
-                id: user.id,
-            }
-        }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
-        res.status(200).json({ accessToken})
-    } else {
-        res.status(401);
-        throw new Error("Invalid credentials");}
-}
-);
 
 //@desc current  user info
 //@route GET /api/users/auth
