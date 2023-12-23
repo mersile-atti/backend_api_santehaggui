@@ -287,7 +287,32 @@ const getUserPic = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({userPic});
-})
+});
+
+//@desc update userPic
+//@route PUT /api/healthRecords/profile/pic
+//@access Private
+
+const updateUserPic = asyncHandler(async (req, res) => {
+    const userID = req.user.id;
+
+    const userPic = await UserProfilePic.findOne({ user: userID });
+    if (!userPic) {
+        throw new Error('User profile picture not found');
+    }
+
+    userPic.photUrl = req.body.photUrl;
+    await userPic.save();
+
+    res.status(200).json({ userPic });
+
+});
+
+//@desc delete userPic
+//@route DELETE /api/healthRecords/profile/pic
+//@access Private
+
+
 
 module.exports=  {
     getAllEmergencyProfiles,
@@ -296,5 +321,7 @@ module.exports=  {
     getUserEmergencyUniqueProfile,
     deleteUserEmergencyProfile,
     setProfilePic,
-    getUserPic
+    getUserPic,
+    updateUserPic,
+    
 }

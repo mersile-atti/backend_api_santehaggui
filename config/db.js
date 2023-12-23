@@ -1,12 +1,17 @@
 const mongoose = require('mongoose');
+const { getSecret } = require('./getSecret');
 
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGO_URI)
+        const secretValue = await getSecret();
+
+        const secretObject = JSON.parse(secretValue);
+
+        const conn = await mongoose.connect(secretObject.MONGO_URI);
         console.log(`MongoDb Connect: ${conn.connection.host}, ${conn.connection.name}`);
     } catch (error) {
-        console.log(error);
-        process.exit(1);    
+        console.error("Une erreur s'est produite lors de la connexion à MongoDB :", error);
+        process.exit(1);
     }
 };
 
