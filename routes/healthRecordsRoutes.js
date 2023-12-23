@@ -11,7 +11,7 @@ const {
     setProfilePic,
     getUserPic,
     updateUserPic,
-    deleteUserPic
+    
 } = require('../controllers/healthRecordsControllers');
 const {
     getUserHealthMetrics,
@@ -27,5 +27,5 @@ router.use(validateToken);
 router.get('/', getAllEmergencyProfiles)
 router.route('/profile').get(getUserEmergencyUniqueProfile).post(createUserEmergencyProfile).put(updateUserEmergencyProfile).delete(deleteUserEmergencyProfile);
 router.route('/metrics').get(getUserHealthMetrics).post(createNewHealthMetrics).put(updateHealthMetrics);
-router.route('/profile/pic').get(getUserPic).post(setProfilePic).put(updateUserPic).delete(deleteUserPic);
+router.route('/profile/pic').get(getUserPic).post(setProfilePic).put(updateUserPic);
 module.exports = router;
