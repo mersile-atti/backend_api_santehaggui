@@ -17,7 +17,7 @@ const s3 = new S3Client({
         accessKeyId: aws_access_key_id,
         secretAccessKey: aws_secret_access_key
     },
-    region: 'us-east-1',
+    region: 'eu-west-3',
 })
 
 //@desc Get all emergies profiles
