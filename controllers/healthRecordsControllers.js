@@ -11,14 +11,13 @@ const UserProfilePic = require('../models/profilePicModel')
 
 const aws_access_key_id = process.env.AWS_ACCESS_KEY_ID;
 const aws_secret_access_key = process.env.AWS_SECRET_ACCESS_KEY;
-const s3_region = process.env.S3_REGION;
 
 const s3 = new S3Client({
     credentials: {
         accessKeyId: aws_access_key_id,
         secretAccessKey: aws_secret_access_key
     },
-    region: s3_region,
+    region: 'us-east-1',
 })
 
 //@desc Get all emergies profiles
