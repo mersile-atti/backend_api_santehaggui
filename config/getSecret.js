@@ -1,6 +1,6 @@
 const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client-secrets-manager');
 
-const secretName = "prod/myserverbackend/santehaggui";
+const secretName = "prod/myserverAPI/santehaggui";
 const client = new SecretsManagerClient({ region: "us-east-1" });
 
 async function getSecret() {
