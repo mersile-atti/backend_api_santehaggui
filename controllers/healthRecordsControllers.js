@@ -5,21 +5,37 @@ const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const UserProfilePic = require('../models/profilePicModel')
+const { getSecret } = require('../config/getSecret');
+
 
 
 // connect to aws s3
+// s3Config.js
 
-const aws_access_key_id = process.env.AWS_ACCESS_KEY_ID;
-const aws_secret_access_key = process.env.AWS_SECRET_ACCESS_KEY;
-const s3_region = process.env.S3_REGION;
 
+
+
+
+
+let awsCredentials;
+let s3Region;
+
+getSecret()
+    .then((secretValue) => {
+      const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = JSON.parse(secretValue);
+      const { S3_REGION } = JSON.parse(secretValue);
+      awsCredentials = { accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY };
+      s3Region = S3_REGION;
+    })
+    .catch((error) => {
+        console.error("An error occurred while getting the S3_REGION secret:", error);
+        process.exit(1);
+    });
+ 
 const s3 = new S3Client({
-    credentials: {
-        accessKeyId: aws_access_key_id,
-        secretAccessKey: aws_secret_access_key
-    },
-    region: s3_region,
-})
+  credentials: awsCredentials,
+  region: s3Region,
+  })
 
 //@desc Get all emergies profiles
 //@route GET /api/healthRecords
