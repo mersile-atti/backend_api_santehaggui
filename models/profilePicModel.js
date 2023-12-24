@@ -6,7 +6,11 @@ const UserProfilePictureSchema = mongoose.Schema({
         ref: 'User',
         required: true
     },
-    photUrl: String,
-});
+    photoUrl: String,
+},
+    {
+        timestamps: true
+    }
+);
 
 module.exports = mongoose.model('UserProfilePic', UserProfilePictureSchema);

@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const EmergencyMedicalProfile = require('../models/EmergencyProfile');
 const User = require('../models/userModel');
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const aws = require("aws-sdk");
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const UserProfilePic = require('../models/profilePicModel')
@@ -10,32 +10,57 @@ const { getSecret } = require('../config/getSecret');
 
 
 // connect to aws s3
-// s3Config.js
+const setProfilePic = asyncHandler(async (req, res) => {
+  try {
+    const secretValue = await getSecret();
+    const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_REGION } = JSON.parse(secretValue);
 
-
-
-
-
-
-let awsCredentials;
-let s3Region;
-
-getSecret()
-    .then((secretValue) => {
-      const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = JSON.parse(secretValue);
-      const { S3_REGION } = JSON.parse(secretValue);
-      awsCredentials = { accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY };
-      s3Region = S3_REGION;
-    })
-    .catch((error) => {
-        console.error("An error occurred while getting the S3_REGION secret:", error);
-        process.exit(1);
+    const s3Bucket = new aws.S3({
+      credentials: {
+        accessKeyId: AWS_ACCESS_KEY_ID,
+        secretAccessKey: AWS_SECRET_ACCESS_KEY,
+      },
+      region: S3_REGION,
     });
- 
-const s3 = new S3Client({
-  credentials: awsCredentials,
-  region: s3Region,
-  })
+
+    const upload = multer({
+      storage: multerS3({
+        s3: s3Bucket,
+        bucket: "mysantehagguiproject-696700314561", // Replace with your actual bucket name
+        metadata: function (req, file, cb) {
+          cb(null, { fieldName: file.fieldname });
+        },
+        key: function (req, file, cb) {
+          cb(null, `images-${Date.now()}.jpeg`);
+        },
+      }),
+    });
+
+    const userID = req.user.id; 
+    const uploadSingle = upload.single('images');
+
+    uploadSingle(req, res, async (err) => {
+      if (err) {
+        console.error("Error uploading file:", err);
+        return res.status(400).json({ success: false, message: err.message });
+      }
+
+      await UserProfilePic.create({
+        photoUrl: req.file.location,
+        user: userID
+      })
+      res.status(200).json({ success: true, data: req.file.location });
+    });
+  } catch (error) {
+    console.error("An error occurred during S3 client initialization:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+
+
+  
+
+// Call the function to initialize the S3 client
 
 //@desc Get all emergies profiles
 //@route GET /api/healthRecords
@@ -255,40 +280,7 @@ const deleteUserEmergencyProfile = asyncHandler(
             message: `Successfully deleted Emergency Profile with ID ${emergencyProfileID}`
         })
     });
-    const upload = (bucketName) => {
-      return multer({
-     storage: multerS3({
-       s3,
-       bucket: bucketName,
-       metadata: function (req, file, cb) {
-         cb(null, { fieldName: file.fieldname });
-       },
-       key: function (req, file, cb) {
-         cb(null, `images-${Date.now()}.jpg`)
-       },
-     })
-   });
- };
 
-const setProfilePic = asyncHandler(async (req, res) => {
-    const userID = req.user.id;
-
-
-    const uploadSingle = upload("mysantehagguiproject-696700314561").single('images');
-    uploadSingle(req, res, async(err) => {
-    
-      if (err) 
-        return res.status(400).json({ success: false, message: err.message });
-        
-      await UserProfilePic.create({
-        photUrl: req.file.location,
-        user: userID
-      })
-        
-      res.status(200).json({ data: req.file })
-      });
-
-});
 
 //@descr get userPic 
 //@route GET /api/healthRecords/profile/pic
