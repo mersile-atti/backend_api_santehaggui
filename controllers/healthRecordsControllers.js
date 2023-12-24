@@ -320,19 +320,6 @@ const updateUserPic = asyncHandler(async (req, res) => {
 //@route DELETE /api/healthRecords/profile/pic
 //@access Private
 
-const deleteUserPic = asyncHandler(async (req, res) => {
-    const userID = req.user.id;
-
-    const userPic = await UserProfilePic.findOne({ user: userID });
-    if (!userPic) {
-        throw new Error('User profile picture not found');
-    }
-
-    await userPic.remove();
-
-    res.status(200).json({ message: 'User profile picture deleted successfully' });
-
-})
 
 module.exports=  {
     getAllEmergencyProfiles,
@@ -343,6 +330,5 @@ module.exports=  {
     setProfilePic,
     getUserPic,
     updateUserPic,
-    deleteUserPic
     
 }
