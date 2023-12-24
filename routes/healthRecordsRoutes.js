@@ -84,7 +84,7 @@ router.route('/profile/pic').get(asyncHandler(async (req, res) => {
      })
     } catch (error) {
       console.error("An error occurred during S3 client initialization:", error);
-      res.status(500).json({ success: false, message: "Internal Server Error" });
+      res.status(500).json({ success: false, message: error});
     }
   }));
 module.exports = router;
