@@ -13,14 +13,14 @@ const { getSecret } = require('../config/getSecret');
 const setProfilePic = asyncHandler(async (req, res) => {
   try {
     const secretValue = await getSecret();
-    const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_REGION } = JSON.parse(secretValue);
+    const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = JSON.parse(secretValue);
 
     const s3Bucket = new aws.S3({
       credentials: {
         accessKeyId: AWS_ACCESS_KEY_ID,
         secretAccessKey: AWS_SECRET_ACCESS_KEY,
       },
-      region: S3_REGION,
+      region: "eu-west-3",
     });
 
     const upload = multer({
