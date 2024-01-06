@@ -1,64 +1,10 @@
 const asyncHandler = require('express-async-handler');
 const EmergencyMedicalProfile = require('../models/EmergencyProfile');
 const User = require('../models/userModel');
-const aws = require("aws-sdk");
-const multer = require('multer');
-const multerS3 = require('multer-s3');
-const UserProfilePic = require('../models/profilePicModel')
-const { getSecret } = require('../config/getSecret');
+const UserProfilePic = require('../models/profilePicModel');
 
 
 
-// connect to aws s3
-const setProfilePic = asyncHandler(async (req, res) => {
-  try {
-    const secretValue = await getSecret();
-    const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_REGION } = JSON.parse(secretValue);
-
-    const s3Bucket = new aws.S3({
-      credentials: {
-        accessKeyId: AWS_ACCESS_KEY_ID,
-        secretAccessKey: AWS_SECRET_ACCESS_KEY,
-      },
-      region: S3_REGION,
-    });
-
-    const upload = multer({
-      storage: multerS3({
-        s3: s3Bucket,
-        bucket: "santehagguiprojectprofilepicsbucket-696700314561",
-        metadata: function (req, file, cb) {
-          cb(null, { fieldName: file.fieldname });
-        },
-        key: function (req, file, cb) {
-          cb(null, `images-${Date.now()}.jpeg`);
-        },
-      }),
-    });
-
-    const userID = req.user.id; 
-    const uploadSingle = upload.single('images');
-
-    uploadSingle(req, res, async (err) => {
-      if (err) {
-        console.error("Error uploading file:", err);
-        return res.status(400).json({ success: false, message: err.message });
-      }
-
-      await UserProfilePic.create({
-        photoUrl: req.file.location,
-        user: userID
-      })
-      res.status(200).json({ success: true, data: req.file.location });
-    });
-  } catch (error) {
-    console.error("An error occurred during S3 client initialization:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
-  }
-});
-
-
-  
 
 // Call the function to initialize the S3 client
 
@@ -101,6 +47,7 @@ const createUserEmergencyProfile = asyncHandler(
 
         const userID = req.user.id;
 
+
         try {
             // Check if the user already has an emergency profile
             const existingEmergencyProfile = await EmergencyMedicalProfile.findOne({ user: userID });
@@ -112,7 +59,16 @@ const createUserEmergencyProfile = asyncHandler(
                 });
             } else {
                 // No existing emergency profile found, create a new one
+                const profilePic = await UserProfilePic.findOne({ user: userID });
 
+                if (!profilePic) {
+                    console.log('User does not have a profile picture');
+                    return res.status(400).json({
+                        error: 'User does not have a profile picture',
+                    });
+                }
+        
+                const photoUrlId = profilePic.photoUrl;
                 
                 // Create the emergency profile with the uploaded image
                 const newEmergencyProfile = await EmergencyMedicalProfile.create({
@@ -130,6 +86,7 @@ const createUserEmergencyProfile = asyncHandler(
                     address,
                     notes,
                     user: userID,
+                    photoUrl: photoUrlId,
                 });
 
                 console.log('New emergency profile created:', newEmergencyProfile);
@@ -153,8 +110,8 @@ const createUserEmergencyProfile = asyncHandler(
 //@access Private
 const getUserEmergencyUniqueProfile = asyncHandler(
     async(req, res) => {
-        const userID = req.user.id;
-        const emergencyProfiles = await EmergencyMedicalProfile.findOne({user: userID});
+        //const userID = req.user.id;
+        const emergencyProfiles = await EmergencyMedicalProfile.find();
         res.json({
             emergencyProfiles
         })
@@ -282,21 +239,6 @@ const deleteUserEmergencyProfile = asyncHandler(
     });
 
 
-//@descr get userPic 
-//@route GET /api/healthRecords/profile/pic
-//@access Private
-
-const getUserPic = asyncHandler(async (req, res) => {
-    const userID = req.user.id;
-
-    const userPic = await UserProfilePic.findOne({ user: userID });
-    if (!userPic) {
-        throw new Error('User profile picture not found');
-    }
-
-    res.status(200).json({userPic});
-});
-
 //@desc update userPic
 //@route PUT /api/healthRecords/profile/pic
 //@access Private
@@ -330,9 +272,11 @@ const deleteUserPic = asyncHandler(async (req, res) => {
 
     await userPic.remove();
 
-    res.status(200).json({ message: 'User profile picture deleted successfully' });
+    res.status(200).json({ message: 'User profile picture deleted' });
+
 
 })
+
 
 module.exports=  {
     getAllEmergencyProfiles,
@@ -340,8 +284,6 @@ module.exports=  {
     updateUserEmergencyProfile,
     getUserEmergencyUniqueProfile,
     deleteUserEmergencyProfile,
-    setProfilePic,
-    getUserPic,
     updateUserPic,
     deleteUserPic
     

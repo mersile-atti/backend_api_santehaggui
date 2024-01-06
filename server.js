@@ -1,5 +1,5 @@
 const express = require('express');
-
+const cors = require('cors');
 
 
 
@@ -27,6 +27,16 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Allow cross-origin requests
+
+app.use(cors({
+    origin: 'https://frontend-santehaggui.vercel.app',
+    allowedHeaders: ['Authorization', 'Content-Type'],
+    allowedMethods: ['GET', 'POST'],
+    credentials: true
+  }));
+
 
 app.use('/api/healthRecords', require('./routes/healthRecordsRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
