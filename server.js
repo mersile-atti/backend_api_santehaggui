@@ -30,12 +30,12 @@ app.use(express.urlencoded({ extended: true }));
 
 // Allow cross-origin requests
 
-app.use((req, res, next) => {
-        res.header('Access-Control-Allow-Origin', 'https://frontend-santehaggui.vercel.app/');
-        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        next();
-    });
+app.use(cors({
+    origin: 'https://frontend-santehaggui.vercel.app',
+    allowedHeaders: ['Authorization', 'Content-Type'],
+    allowedMethods: ['GET', 'POST'],
+    credentials: true
+  }));
 
 
 app.use('/api/healthRecords', require('./routes/healthRecordsRoutes'));
