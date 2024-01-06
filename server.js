@@ -29,15 +29,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Allow cross-origin requests
-const corsOptions = {
-    "origin": "*",
-  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-  "preflightContinue": false,
-  "optionsSuccessStatus": 204// some legacy browsers (IE11, various SmartTVs) choke on 204
-  }
+
+app.use((req, res, next) => {
+        res.header('Access-Control-Allow-Origin', 'https://frontend-santehaggui.vercel.app/');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        next();
+    });
 
 
-app.use('/api/healthRecords',cors(corsOptions), require('./routes/healthRecordsRoutes'));
+app.use('/api/healthRecords', require('./routes/healthRecordsRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/blood-requests', require('./routes/bloodRequestRoutes'));
 
