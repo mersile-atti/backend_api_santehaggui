@@ -25,6 +25,7 @@ const {
     createUserEmergencyProfile,
     updateUserEmergencyProfile,
     getUserEmergencyUniqueProfile,
+    getEmergencyProfileURL,
     deleteUserEmergencyProfile,
 } = require('../controllers/healthRecordsControllers');
 const {
@@ -37,6 +38,7 @@ const validateToken = require('../middleware/validateTokenHandler');
 
 
 router.get('/', validateToken, getAllEmergencyProfiles)
+router.get('/profile-url', validateToken, getEmergencyProfileURL)
 router.route('/profile').get(getUserEmergencyUniqueProfile).post(validateToken, createUserEmergencyProfile).put(validateToken, updateUserEmergencyProfile).delete(validateToken, deleteUserEmergencyProfile);
 router.route('/metrics').get(validateToken, getUserHealthMetrics).post(validateToken, createNewHealthMetrics).put(validateToken, updateHealthMetrics);
 router.route('/profile/pic').get(validateToken, asyncHandler(async (req, res) => {
