@@ -1,12 +1,29 @@
 const mongoose = require('mongoose');
 
+function generateUMI() {
+    const characters= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const umiLength = 10;
+
+    let umi = '';
+    for (let i = 0; i < umiLength; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        umi += characters[randomIndex];
+    }
+    return umi;
+}
+
 const EmergencyMedicalProfileSchema = mongoose.Schema({
+    umi: {type: String, unique: true, required: true, default: generateUMI},
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
     },
-    profilePicture: String,
+    photoUrl: {
+        type: String,
+        ref: 'UserProfilePic',
+        required: true,
+    },
     name: String,
     birthday: String,
     gender: String,

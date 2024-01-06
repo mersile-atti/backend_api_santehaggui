@@ -2,8 +2,11 @@ const expres = require('express');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/userModel');
 const router = expres.Router();
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const crypto = require('crypto');
+const sharp = require('sharp');
 const aws = require("aws-sdk");
+const s3 = new aws.S3();
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const UserProfilePic = require('../models/profilePicModel')
@@ -11,6 +14,9 @@ const { getSecret } = require('../config/getSecret');
 
 const storage = multer.memoryStorage();
 const upload = multer({storage: storage})
+
+const generateFileName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
+
 
 
 
@@ -46,45 +52,56 @@ router.route('/profile/pic').get(asyncHandler(async (req, res) => {
     res.status(200).json({userPic});
 })
 ).post(upload.single('image'), asyncHandler(async (req, res) => {
-    try {
-      const secretValue = await getSecret();
-      const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_REGION } = JSON.parse(secretValue);
+  try {
+    const secretValue = await getSecret();
+    const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_REGION } = JSON.parse(secretValue);
+
+    const s3Bucket = new S3Client({
+      credentials: {
+        accessKeyId: AWS_ACCESS_KEY_ID,
+        secretAccessKey: AWS_SECRET_ACCESS_KEY,
+      },
+      region: S3_REGION,
+    });
   
-      const s3Bucket = new S3Client({
-        credentials: {
-          accessKeyId: AWS_ACCESS_KEY_ID,
-          secretAccessKey: AWS_SECRET_ACCESS_KEY,
-        },
-        region: S3_REGION,
-      });
+    const file = req.file 
+  
+    const fileBuffer = await sharp(file.buffer)
+      .resize({ height: 1920, width: 1080, fit: "contain" })
+      .toBuffer()
+  
+    // Configure the upload details to send to S3
+    const fileName = generateFileName()
 
-     req.file.buffer;
+   const uploadParams = {
+      Bucket: "santehagguiprojectprofilepicsbucket-696700314561",
+      Body: fileBuffer,
+      Key: fileName,
+      ContentType: file.mimetype
+  }
 
-     const params = {
-        Bucket: "santehagguiprojectprofilepicsbucket-696700314561",
-        Key: req.file.originalname,
-        Body: req.file.buffer,
-        ContentType: req.file.mimetype,
-    }
+   // Send the upload to S3
+  await s3Bucket.send(new PutObjectCommand(uploadParams));
+  const imageURL = `https://s3.amazonaws.com/santehagguiprojectprofilepicsbucket-696700314561/${fileName}`;
 
-     const commande = new PutObjectCommand(params);
-     const data = await s3Bucket.send(commande);
 
-     const userID = req.user.id; 
+   const userID = req.user.id; 
+  // Save the image URL to MongoDB
+  await UserProfilePic.create({
+    photoUrl: imageURL,
+    user: userID,
+  });
 
-     await UserProfilePic.create({
-        photoUrl: req.file.originalname,
-        user: userID
-      });
+  res.status(200).json({
+    success: true,
+    data: imageURL,
+    message: "Image uploaded and saved successfully",
+  });
+ 
+  } catch (error) {
+    console.error("An error occurred during S3 client initialization:", error);
+    res.status(500).json({ success: false, message: error});
+  }
+}));
 
-     res.status(200).json({
-        success: true,
-        data: req.file.originalname,
-        message: "File uploaded successfully",
-     })
-    } catch (error) {
-      console.error("An error occurred during S3 client initialization:", error);
-      res.status(500).json({ success: false, message: error});
-    }
-  }));
 module.exports = router;

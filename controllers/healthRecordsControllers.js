@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const EmergencyMedicalProfile = require('../models/EmergencyProfile');
 const User = require('../models/userModel');
+const UserProfilePic = require('../models/profilePicModel');
 
 
 
@@ -46,6 +47,7 @@ const createUserEmergencyProfile = asyncHandler(
 
         const userID = req.user.id;
 
+
         try {
             // Check if the user already has an emergency profile
             const existingEmergencyProfile = await EmergencyMedicalProfile.findOne({ user: userID });
@@ -57,7 +59,16 @@ const createUserEmergencyProfile = asyncHandler(
                 });
             } else {
                 // No existing emergency profile found, create a new one
+                const profilePic = await UserProfilePic.findOne({ user: userID });
 
+                if (!profilePic) {
+                    console.log('User does not have a profile picture');
+                    return res.status(400).json({
+                        error: 'User does not have a profile picture',
+                    });
+                }
+        
+                const photoUrlId = profilePic.photoUrl;
                 
                 // Create the emergency profile with the uploaded image
                 const newEmergencyProfile = await EmergencyMedicalProfile.create({
@@ -75,6 +86,7 @@ const createUserEmergencyProfile = asyncHandler(
                     address,
                     notes,
                     user: userID,
+                    photoUrl: photoUrlId,
                 });
 
                 console.log('New emergency profile created:', newEmergencyProfile);
