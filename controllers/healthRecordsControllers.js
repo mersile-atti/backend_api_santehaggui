@@ -110,13 +110,22 @@ const createUserEmergencyProfile = asyncHandler(
 //@access Private
 const getUserEmergencyUniqueProfile = asyncHandler(
     async(req, res) => {
-        //const userID = req.user.id;
-        const emergencyProfiles = await EmergencyMedicalProfile.find();
+      const userID = req.user.id;
+      const emergencyProfiles = await EmergencyMedicalProfile.findOne({user: userID});
         res.json({
             emergencyProfiles
         })
     }
 );
+
+//@desc Get URL for user's emergency profile
+//@route GET /api/healthRecords/profile-url
+//@access Private
+const getEmergencyProfileURL = asyncHandler(async (req, res) => {
+  const userID = req.user.id;
+  const emergencyProfileURL = `https://frontend-santehaggui.vercel.app/profile/${userID}`;
+  res.json({ emergencyProfileURL });
+});
 
 
 // Update Emergency Profile Function
@@ -284,6 +293,7 @@ module.exports=  {
     updateUserEmergencyProfile,
     getUserEmergencyUniqueProfile,
     deleteUserEmergencyProfile,
+    getEmergencyProfileURL,
     updateUserPic,
     deleteUserPic
     
