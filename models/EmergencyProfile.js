@@ -14,16 +14,6 @@ function generateUMI() {
 
 const EmergencyMedicalProfileSchema = mongoose.Schema({
     umi: {type: String, unique: true, required: true, default: generateUMI},
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
-    },
-    photoUrl: {
-        type: String,
-        ref: 'UserProfilePic',
-        required: true,
-    },
     name: String,
     birthday: String,
     gender: String,

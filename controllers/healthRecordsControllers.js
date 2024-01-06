@@ -110,8 +110,8 @@ const createUserEmergencyProfile = asyncHandler(
 //@access Private
 const getUserEmergencyUniqueProfile = asyncHandler(
     async(req, res) => {
-        const userID = req.user.id;
-        const emergencyProfiles = await EmergencyMedicalProfile.findOne({user: userID});
+        //const userID = req.user.id;
+        const emergencyProfiles = await EmergencyMedicalProfile.find();
         res.json({
             emergencyProfiles
         })
