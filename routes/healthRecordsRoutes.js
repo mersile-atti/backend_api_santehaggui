@@ -35,13 +35,14 @@ const {
 } = require('../controllers/heathMetricsControllers');
 const validateToken = require('../middleware/validateTokenHandler');
 
+router.use(validateToken);
 
 
-router.get('/', validateToken, getAllEmergencyProfiles)
-router.get('/profile-url', validateToken, getEmergencyProfileURL)
-router.route('/profile').get(getUserEmergencyUniqueProfile).post(validateToken, createUserEmergencyProfile).put(validateToken, updateUserEmergencyProfile).delete(validateToken, deleteUserEmergencyProfile);
-router.route('/metrics').get(validateToken, getUserHealthMetrics).post(validateToken, createNewHealthMetrics).put(validateToken, updateHealthMetrics);
-router.route('/profile/pic').get(validateToken, asyncHandler(async (req, res) => {
+router.get('/', getAllEmergencyProfiles)
+router.get('/profile-url', getEmergencyProfileURL)
+router.route('/profile').get(getUserEmergencyUniqueProfile).post(createUserEmergencyProfile).put(updateUserEmergencyProfile).delete(deleteUserEmergencyProfile);
+router.route('/metrics').get(getUserHealthMetrics).post(createNewHealthMetrics).put(updateHealthMetrics);
+router.route('/profile/pic').get(asyncHandler(async (req, res) => {
     const userID = req.user.id;
 
     const userPic = await UserProfilePic.findOne({ user: userID });
@@ -51,7 +52,7 @@ router.route('/profile/pic').get(validateToken, asyncHandler(async (req, res) =>
 
     res.status(200).json({userPic});
 })
-).post(validateToken, upload.single('image'), asyncHandler(async (req, res) => {
+).post(upload.single('image'), asyncHandler(async (req, res) => {
   try {
     const secretValue = await getSecret();
     const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_REGION } = JSON.parse(secretValue);
