@@ -41,6 +41,7 @@ router.use(validateToken);
 router.get('/', getAllEmergencyProfiles)
 router.get('/profile-url', getEmergencyProfileURL)
 router.route('/profile').get(getUserEmergencyUniqueProfile).post(createUserEmergencyProfile).put(updateUserEmergencyProfile).delete(deleteUserEmergencyProfile);
+router.route('/profile/:id').get(getUserEmergencyUniqueProfile);
 router.route('/metrics').get(getUserHealthMetrics).post(createNewHealthMetrics).put(updateHealthMetrics);
 router.route('/profile/pic').get(asyncHandler(async (req, res) => {
     const userID = req.user.id;
